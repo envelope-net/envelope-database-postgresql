@@ -46,57 +46,57 @@ public static class NpgsqlConnectionExtensions
 	public static Task DropTableAsync(this NpgsqlConnection connection, NpgsqlTransaction? transaction, string tableName, CancellationToken cancellationToken = default)
 		=> PostgreSqlCommands.DropTableAsync(connection, transaction, tableName, cancellationToken);
 
-	public static ITransactionContext BeginTransactionAndAttachToTransactionContext(this NpgsqlConnection connection, ITransactionContext transactionContext)
+	public static ITransactionManager BeginTransactionAndAttachToTransactionManager(this NpgsqlConnection connection, ITransactionManager transactionManager)
 	{
 		if (connection == null)
 			throw new ArgumentNullException(nameof(connection));
 
-		if (transactionContext == null)
-			throw new ArgumentNullException(nameof(transactionContext));
+		if (transactionManager == null)
+			throw new ArgumentNullException(nameof(transactionManager));
 
 		var transaction = connection.BeginTransaction();
-		transaction.AttachToTransactionContext(transactionContext);
-		return transactionContext;
+		transaction.AttachToTransactionManager(transactionManager);
+		return transactionManager;
 	}
 
-	public static ITransactionContext BeginTransactionContext(this NpgsqlConnection connection)
-		=> BeginTransactionContext(connection, null);
+	public static ITransactionManager BeginTransactionManager(this NpgsqlConnection connection)
+		=> BeginTransactionManager(connection, null);
 
-	public static ITransactionContext BeginTransactionContext(this NpgsqlConnection connection, Action<ITransactionObserverConnector>? configure)
+	public static ITransactionManager BeginTransactionManager(this NpgsqlConnection connection, Action<ITransactionObserverConnector>? configure)
 	{
 		if (connection == null)
 			throw new ArgumentNullException(nameof(connection));
 
 		var transaction = connection.BeginTransaction();
-		var transactionContext = transaction.ToTransactionContext(configure);
-		return transactionContext;
+		var transactionManager = transaction.ToTransactionManager(configure);
+		return transactionManager;
 	}
 
 #if NET6_0_OR_GREATER
-	public static async Task<NpgsqlTransaction> BeginTransactionAndAttachToTransactionContextAsync(this NpgsqlConnection connection, ITransactionContext transactionContext, CancellationToken cancellationToken = default)
+	public static async Task<NpgsqlTransaction> BeginTransactionAndAttachToTransactionManagerAsync(this NpgsqlConnection connection, ITransactionManager transactionManager, CancellationToken cancellationToken = default)
 	{
 		if (connection == null)
 			throw new ArgumentNullException(nameof(connection));
 
-		if (transactionContext == null)
-			throw new ArgumentNullException(nameof(transactionContext));
+		if (transactionManager == null)
+			throw new ArgumentNullException(nameof(transactionManager));
 
 		var transaction = await connection.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
-		transaction.AttachToTransactionContext(transactionContext);
+		transaction.AttachToTransactionManager(transactionManager);
 		return transaction;
 	}
 
-	public static Task<ITransactionContext> BeginTransactionContextAsync(this NpgsqlConnection connection, CancellationToken cancellationToken = default)
-		=> BeginTransactionContextAsync(connection, null, cancellationToken);
+	public static Task<ITransactionManager> BeginTransactionManagerAsync(this NpgsqlConnection connection, CancellationToken cancellationToken = default)
+		=> BeginTransactionManagerAsync(connection, null, cancellationToken);
 
-	public static async Task<ITransactionContext> BeginTransactionContextAsync(this NpgsqlConnection connection, Action<ITransactionObserverConnector>? configure, CancellationToken cancellationToken = default)
+	public static async Task<ITransactionManager> BeginTransactionManagerAsync(this NpgsqlConnection connection, Action<ITransactionObserverConnector>? configure, CancellationToken cancellationToken = default)
 	{
 		if (connection == null)
 			throw new ArgumentNullException(nameof(connection));
 
 		var transaction = await connection.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
-		var transactionContext = transaction.ToTransactionContext(configure);
-		return transactionContext;
+		var transactionManager = transaction.ToTransactionManager(configure);
+		return transactionManager;
 	}
 #endif
 }

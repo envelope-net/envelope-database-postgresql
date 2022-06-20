@@ -8,19 +8,19 @@ public class BulkInsert : DictionaryTable, IDisposable
 	private readonly bool _isInternalConnection;
 	private bool _internalConnectionIsOpened;
 
-	public BulkInsert(DictionaryTableOptions options)
+	public BulkInsert(IDictionaryTableOptions options)
 		: this(options, (NpgsqlConnection?)null)
 	{
 	}
 
-	public BulkInsert(DictionaryTableOptions options, string connectionString)
+	public BulkInsert(IDictionaryTableOptions options, string connectionString)
 		: this(options, (NpgsqlConnection?)null)
 	{
 		_connection = new NpgsqlConnection(connectionString);
 		_isInternalConnection = true;
 	}
 
-	public BulkInsert(DictionaryTableOptions options, NpgsqlConnection? connection)
+	public BulkInsert(IDictionaryTableOptions options, NpgsqlConnection? connection)
 		: base(options, true)
 	{
 		if (options == null)
@@ -260,8 +260,8 @@ public class BulkInsert : DictionaryTable, IDisposable
 
 //		await using (var connection = new NpgsqlConnection(connectionString))
 //		{
-//			await connection.OpenAsync();
-//			await WriteBatch(rows, connection, false, false);
+//			await connection.OpenAsync().ConfigureAwait(false);
+//			await WriteBatch(rows, connection, false, false).ConfigureAwait(false);
 //		}
 //	}
 
@@ -286,7 +286,7 @@ public class BulkInsert : DictionaryTable, IDisposable
 
 //		if (openConnection || (_isInternalConnection && !_internalConnectionIsOpened))
 //		{
-//			await connection.OpenAsync();
+//			await connection.OpenAsync().ConfigureAwait(false);
 //			_internalConnectionIsOpened = true;
 //		}
 
@@ -301,7 +301,7 @@ public class BulkInsert : DictionaryTable, IDisposable
 //		{
 //			foreach (var row in rows)
 //			{
-//				await writer.StartRowAsync();
+//				await writer.StartRowAsync().ConfigureAwait(false);
 
 //				_objectWrapper.SetTargetInstance(row);
 //				foreach (var propertyName in _propertyNames)
@@ -311,11 +311,11 @@ public class BulkInsert : DictionaryTable, IDisposable
 //					if (_propertyValueConverter != null && _propertyValueConverter.TryGetValue(propertyName, out Func<object, object>? converter))
 //						value = converter(value);
 
-//					await writer.WriteAsync(value, _columnTypes[propertyName]);
+//					await writer.WriteAsync(value, _columnTypes[propertyName]).ConfigureAwait(false);
 //				}
 //			}
 
-//			await writer.CompleteAsync();
+//			await writer.CompleteAsync().ConfigureAwait(false);
 //		}
 
 //		if (disposeConnection)

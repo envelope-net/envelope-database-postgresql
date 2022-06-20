@@ -1,44 +1,32 @@
-﻿using NpgsqlTypes;
-using Envelope.Data;
-using Envelope.Infrastructure;
+﻿using Envelope.Data;
 
 namespace Envelope.Database.PostgreSql;
 
-public class DbBatchWriterOptions : BatchWriterOptions, IDbBatchWriterOptions, IBatchWriterOptions
+public class DbBatchWriterOptions : DictionaryTableOptions, IDbBatchWriterOptions, IDictionaryTableOptions, IBatchWriterOptions
 {
 	public string? ConnectionString { get; set; }
-	public string? SchemaName { get; set; }
-	public string? TableName { get; set; } = nameof(EnvironmentInfo);
-	public List<string>? PropertyNames { get; set; }
-	public Dictionary<string, string>? PropertyColumnMapping { get; set; }
-	public Dictionary<string, NpgsqlDbType>? PropertyTypeMapping { get; set; }
-	public Dictionary<string, Func<object?, object?>>? PropertyValueConverter { get; set; }
-	public bool UseQuotationMarksForTableName { get; set; } = true;
-	public bool UseQuotationMarksForColumnNames { get; set; } = true;
+
+	public bool EagerlyEmitFirstEvent { get; set; } = true;
+
+	public int BatchSizeLimit { get; set; } = 1000;
+
+	public TimeSpan Period { get; set; } = TimeSpan.FromSeconds(2);
+
+	public TimeSpan MinimumBackoffPeriod { get; set; } = TimeSpan.FromSeconds(5);
+
+	public TimeSpan MaximumBackoffInterval { get; set; } = TimeSpan.FromMinutes(10);
+
+	public int? QueueLimit { get; set; } = 100000;
 
 	public DbBatchWriterOptions()
 	{
 	}
 
-	public virtual DbBatchWriterOptions Validate()
+	public override void Validate(bool validateProperties, bool validatePropertyMapping)
 	{
 		if (string.IsNullOrWhiteSpace(ConnectionString))
-			throw new ArgumentNullException(nameof(ConnectionString));
+			throw new InvalidOperationException($"{nameof(ConnectionString)} == null");
 
-		return this;
+		base.Validate(validateProperties, validatePropertyMapping);
 	}
-
-	public DictionaryTableOptions ToDictionaryTableOptions(bool validateProperties = true, bool validatePropertyMapping = true)
-		=> new DictionaryTableOptions
-		{
-			SchemaName = SchemaName,
-			TableName = TableName,
-			PropertyNames = PropertyNames,
-			PropertyColumnMapping = PropertyColumnMapping,
-			PropertyTypeMapping = PropertyTypeMapping,
-			PropertyValueConverter = PropertyValueConverter,
-			UseQuotationMarksForTableName = UseQuotationMarksForTableName,
-			UseQuotationMarksForColumnNames = UseQuotationMarksForColumnNames
-		}
-		.Validate(validateProperties, validatePropertyMapping);
 }

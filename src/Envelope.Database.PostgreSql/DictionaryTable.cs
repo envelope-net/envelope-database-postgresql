@@ -21,12 +21,12 @@ public class DictionaryTable
 	public IReadOnlyDictionary<string, NpgsqlDbType>? ColumnTypes { get; }
 
 
-	public DictionaryTable(DictionaryTableOptions options)
+	public DictionaryTable(IDictionaryTableOptions options)
 		: this(options, false)
 	{
 	}
 
-	protected DictionaryTable(DictionaryTableOptions options, bool propertyTypeMappingIsRequired)
+	protected DictionaryTable(IDictionaryTableOptions options, bool propertyTypeMappingIsRequired)
 	{
 		if (options == null)
 			throw new ArgumentNullException(nameof(options));
@@ -185,6 +185,6 @@ public class DictionaryTable
 		if (PropertyTypeMapping.TryGetValue(memberName, out NpgsqlDbType result))
 			return result;
 		else
-			throw new InvalidOperationException($"Property '{memberName}' has no type defined in options.{nameof(DictionaryTableOptions.PropertyTypeMapping)}");
+			throw new InvalidOperationException($"Property '{memberName}' has no type defined in options.{nameof(IDictionaryTableOptions.PropertyTypeMapping)}");
 	}
 }
