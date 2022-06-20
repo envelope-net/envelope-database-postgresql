@@ -13,10 +13,10 @@ public abstract class DbBatchWriter<T> : BatchWriter<T>, IDisposable
 		if (options == null)
 			throw new ArgumentNullException(nameof(options));
 
-		options.Validate();
+		options.Validate(true, true);
 
 		_connectionString = options.ConnectionString;
-		BulkInsert = new BulkInsert(options.ToDictionaryTableOptions(true, true));
+		BulkInsert = new BulkInsert(options);
 	}
 
 	public abstract IDictionary<string, object?>? ToDictionary(T obj);

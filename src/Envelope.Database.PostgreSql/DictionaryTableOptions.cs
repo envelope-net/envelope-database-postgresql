@@ -2,7 +2,7 @@
 
 namespace Envelope.Database.PostgreSql;
 
-public class DictionaryTableOptions
+public class DictionaryTableOptions : IDictionaryTableOptions
 {
 	public string? SchemaName { get; set; }
 	public string? TableName { get; set; }
@@ -15,7 +15,7 @@ public class DictionaryTableOptions
 	public bool UseQuotationMarksForColumnNames { get; set; } = true;
 	public bool PropertyTypeMappingIsRequired { get; set; }
 
-	public DictionaryTableOptions Validate(bool validateProperties, bool validatePropertyMapping)
+	public virtual void Validate(bool validateProperties, bool validatePropertyMapping)
 	{
 		if (!IsTemporaryTable && string.IsNullOrWhiteSpace(SchemaName))
 			throw new InvalidOperationException($"{nameof(SchemaName)} == null");
@@ -38,7 +38,5 @@ public class DictionaryTableOptions
 
 		if (validatePropertyMapping && (PropertyTypeMapping == null || PropertyTypeMapping.Count == 0))
 			throw new InvalidOperationException($"{nameof(PropertyTypeMapping)} == null");
-
-		return this;
 	}
 }

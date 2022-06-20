@@ -12,16 +12,16 @@ internal class NpgsqlTransactionBehaviorObserver : ITransactionBehaviorObserver
 		_transaction = transaction ?? throw new ArgumentNullException(nameof(transaction));
 	}
 
-	public void Commit(ITransactionContext transactionContext)
+	public void Commit(ITransactionManager transactionManager)
 		=> _transaction.Commit();
 
-	public Task CommitAsync(ITransactionContext transactionContext, CancellationToken cancellationToken)
+	public Task CommitAsync(ITransactionManager transactionManager, CancellationToken cancellationToken)
 		=> _transaction.CommitAsync(cancellationToken);
 
-	public void Rollback(ITransactionContext transactionContext, Exception? exception)
+	public void Rollback(ITransactionManager transactionManager, Exception? exception)
 		=> _transaction.Rollback();
 
-	public Task RollbackAsync(ITransactionContext transactionContext, Exception? exception, CancellationToken cancellationToken)
+	public Task RollbackAsync(ITransactionManager transactionManager, Exception? exception, CancellationToken cancellationToken)
 		=> _transaction.RollbackAsync(cancellationToken);
 
 	public ValueTask DisposeAsync()

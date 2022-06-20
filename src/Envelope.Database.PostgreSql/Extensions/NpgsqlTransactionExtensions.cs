@@ -5,30 +5,30 @@ namespace Npgsql;
 
 public static class NpgsqlTransactionExtensions
 {
-	public static ITransactionContext AttachToTransactionContext(this NpgsqlTransaction transaction, ITransactionContext transactionContext)
+	public static ITransactionManager AttachToTransactionManager(this NpgsqlTransaction transaction, ITransactionManager transactionManager)
 	{
 		if (transaction == null)
 			throw new ArgumentNullException(nameof(transaction));
 
-		if (transactionContext == null)
-			throw new ArgumentNullException(nameof(transactionContext));
+		if (transactionManager == null)
+			throw new ArgumentNullException(nameof(transactionManager));
 
-		transactionContext.ConnectTransactionManager(new NpgsqlTransactionBehaviorObserver(transaction));
+		transactionManager.ConnectTransactionObserver(new NpgsqlTransactionBehaviorObserver(transaction));
 
-		transactionContext.AddUniqueItem(nameof(NpgsqlTransaction), transaction);
-		transactionContext.AddUniqueItem(nameof(NpgsqlConnection), transaction.Connection);
-		return transactionContext;
+		transactionManager.AddUniqueItem(nameof(NpgsqlTransaction), transaction);
+		transactionManager.AddUniqueItem(nameof(NpgsqlConnection), transaction.Connection);
+		return transactionManager;
 	}
 
-	public static ITransactionContext ToTransactionContext(this NpgsqlTransaction transaction)
-		=> ToTransactionContext(transaction, null);
+	public static ITransactionManager ToTransactionManager(this NpgsqlTransaction transaction)
+		=> ToTransactionManager(transaction, null);
 
-	public static ITransactionContext ToTransactionContext(this NpgsqlTransaction transaction, Action<ITransactionObserverConnector>? configure)
+	public static ITransactionManager ToTransactionManager(this NpgsqlTransaction transaction, Action<ITransactionObserverConnector>? configure)
 	{
 		if (transaction == null)
 			throw new ArgumentNullException(nameof(transaction));
 
-		var transactionContext = TransactionContextFactory.CreateTransactionContext(null, configure);
-		return AttachToTransactionContext(transaction, transactionContext);
+		var transactionManager = TransactionManagerFactory.CreateTransactionManager(null, configure);
+		return AttachToTransactionManager(transaction, transactionManager);
 	}
 }
