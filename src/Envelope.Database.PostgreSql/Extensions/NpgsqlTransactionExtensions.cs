@@ -1,34 +1,42 @@
-﻿using Envelope.Database.PostgreSql;
+﻿using Envelope.Database;
+using Envelope.Database.PostgreSql;
 using Envelope.Transactions;
 
 namespace Npgsql;
 
 public static class NpgsqlTransactionExtensions
 {
-	public static ITransactionManager AttachToTransactionManager(this NpgsqlTransaction transaction, ITransactionManager transactionManager)
+	public static ITransactionCoordinator AttachToTransactionCoordinator(
+		this NpgsqlTransaction transaction,
+		ITransactionCoordinator transactionCoordinator)
 	{
 		if (transaction == null)
 			throw new ArgumentNullException(nameof(transaction));
 
-		if (transactionManager == null)
-			throw new ArgumentNullException(nameof(transactionManager));
+		if (transactionCoordinator == null)
+			throw new ArgumentNullException(nameof(transactionCoordinator));
 
-		transactionManager.ConnectTransactionObserver(new NpgsqlTransactionBehaviorObserver(transaction));
+		transactionCoordinator.ConnectTransactionObserver(new NpgsqlTransactionBehaviorObserver(transaction));
 
-		transactionManager.AddUniqueItem(nameof(NpgsqlTransaction), transaction);
-		transactionManager.AddUniqueItem(nameof(NpgsqlConnection), transaction.Connection);
-		return transactionManager;
+		transactionCoordinator.AddUniqueItem(nameof(NpgsqlTransaction), transaction);
+		transactionCoordinator.AddUniqueItem(nameof(NpgsqlConnection), transaction.Connection);
+		return transactionCoordinator;
 	}
 
-	public static ITransactionManager ToTransactionManager(this NpgsqlTransaction transaction)
-		=> ToTransactionManager(transaction, null);
-
-	public static ITransactionManager ToTransactionManager(this NpgsqlTransaction transaction, Action<ITransactionObserverConnector>? configure)
+	public static ITransactionCoordinator ToTransactionCoordinator(
+		this NpgsqlTransaction transaction,
+		IServiceProvider serviceProvider)
 	{
 		if (transaction == null)
 			throw new ArgumentNullException(nameof(transaction));
 
-		var transactionManager = TransactionManagerFactory.CreateTransactionManager(null, configure);
-		return AttachToTransactionManager(transaction, transactionManager);
+		if (serviceProvider == null)
+			throw new ArgumentNullException(nameof(serviceProvider));
+
+		var transactionCoordinator = serviceProvider.GetService(typeof(ITransactionCoordinator)) as ITransactionCoordinator;
+		if (transactionCoordinator == null)
+			throw new InvalidOperationException($"{nameof(transactionCoordinator)} == null");
+
+		return AttachToTransactionCoordinator(transaction, transactionCoordinator);
 	}
 }
