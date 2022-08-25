@@ -13,7 +13,7 @@ public interface IDictionaryTableOptions
 	Dictionary<string, Func<object?, object?>>? PropertyValueConverter { get; }
 	bool UseQuotationMarksForTableName { get; }
 	bool UseQuotationMarksForColumnNames { get; }
-	bool PropertyTypeMappingIsRequired { get; internal set; }
+	bool PropertyTypeMappingIsRequired { get; set; }
 
 	void Validate(bool validateProperties, bool validatePropertyMapping);
 }
