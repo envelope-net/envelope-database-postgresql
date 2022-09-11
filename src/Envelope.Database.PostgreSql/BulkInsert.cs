@@ -106,18 +106,18 @@ public class BulkInsert : DictionaryTable, IDisposable
 		return result;
 	}
 
-	private bool disposed;
+	private bool _disposed;
 	protected virtual void Dispose(bool disposing)
 	{
-		if (!disposed)
-		{
-			if (disposing)
-			{
-				if (_isInternalConnection)
-					_connection?.Dispose();
-			}
+		if (_disposed)
+			return;
 
-			disposed = true;
+		_disposed = true;
+
+		if (disposing)
+		{
+			if (_isInternalConnection)
+				_connection?.Dispose();
 		}
 	}
 
