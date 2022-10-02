@@ -1,9 +1,10 @@
 ﻿using Envelope.Database.PostgreSql;
 using Envelope.Transactions;
+using Npgsql;
 using Npgsql.Internal;
 using System.Reflection;
 
-namespace Npgsql;
+namespace Envelope.Extensions;
 
 public static class NpgsqlConnectionExtensions
 {
@@ -81,7 +82,11 @@ public static class NpgsqlConnectionExtensions
 	public static Task DropTableAsync(this NpgsqlConnection connection, NpgsqlTransaction? transaction, string tableName, CancellationToken cancellationToken = default)
 		=> PostgreSqlCommands.DropTableAsync(connection, transaction, tableName, cancellationToken);
 
-	public static ITransactionCoordinator BeginTransactionAndAttachToTransactionCoordinator(this NpgsqlConnection connection, ITransactionCoordinator transactionCoordinator)
+	public static ITransactionCoordinator BeginTransactionAndAttachToTransactionCoordinator(
+		this NpgsqlConnection connection,
+		ITransactionCoordinator transactionCoordinator,
+		int waitForConnectionExecutingInMilliseconds = 50,
+		int waitForConnectionExecutingCount = 40)
 	{
 		if (connection == null)
 			throw new ArgumentNullException(nameof(connection));
@@ -90,24 +95,31 @@ public static class NpgsqlConnectionExtensions
 			throw new ArgumentNullException(nameof(transactionCoordinator));
 
 		var transaction = connection.BeginTransaction();
-		transaction.AttachToTransactionCoordinator(transactionCoordinator);
+		transaction.AttachToTransactionCoordinator(transactionCoordinator, waitForConnectionExecutingInMilliseconds, waitForConnectionExecutingCount);
 		return transactionCoordinator;
 	}
 
 	public static ITransactionCoordinator BeginTransactionCoordinator(
 		this NpgsqlConnection connection,
-		IServiceProvider serviceProvider)
+		IServiceProvider serviceProvider,
+		int waitForConnectionExecutingInMilliseconds = 50,
+		int waitForConnectionExecutingCount = 40)
 	{
 		if (connection == null)
 			throw new ArgumentNullException(nameof(connection));
 
 		var transaction = connection.BeginTransaction();
-		var transactionCoordinator = transaction.ToTransactionCoordinator(serviceProvider);
+		var transactionCoordinator = transaction.ToTransactionCoordinator(serviceProvider, waitForConnectionExecutingInMilliseconds, waitForConnectionExecutingCount);
 		return transactionCoordinator;
 	}
 
 #if NET6_0_OR_GREATER
-	public static async Task<NpgsqlTransaction> BeginTransactionAndAttachToTransactionCoordinatorAsync(this NpgsqlConnection connection, ITransactionCoordinator transactionCoordinator, CancellationToken cancellationToken = default)
+	public static async Task<NpgsqlTransaction> BeginTransactionAndAttachToTransactionCoordinatorAsync(
+		this NpgsqlConnection connection,
+		ITransactionCoordinator transactionCoordinator,
+		int waitForConnectionExecutingInMilliseconds = 50,
+		int waitForConnectionExecutingCount = 40,
+		CancellationToken cancellationToken = default)
 	{
 		if (connection == null)
 			throw new ArgumentNullException(nameof(connection));
@@ -116,20 +128,22 @@ public static class NpgsqlConnectionExtensions
 			throw new ArgumentNullException(nameof(transactionCoordinator));
 
 		var transaction = await connection.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
-		transaction.AttachToTransactionCoordinator(transactionCoordinator);
+		transaction.AttachToTransactionCoordinator(transactionCoordinator, waitForConnectionExecutingInMilliseconds, waitForConnectionExecutingCount);
 		return transaction;
 	}
 
 	public static async Task<ITransactionCoordinator> BeginTransactionCoordinatorAsync(
 		this NpgsqlConnection connection,
 		IServiceProvider serviceProvider,
+		int waitForConnectionExecutingInMilliseconds = 50,
+		int waitForConnectionExecutingCount = 40,
 		CancellationToken cancellationToken = default)
 	{
 		if (connection == null)
 			throw new ArgumentNullException(nameof(connection));
 
 		var transaction = await connection.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
-		var transactionCoordinator = transaction.ToTransactionCoordinator(serviceProvider);
+		var transactionCoordinator = transaction.ToTransactionCoordinator(serviceProvider, waitForConnectionExecutingInMilliseconds, waitForConnectionExecutingCount);
 		return transactionCoordinator;
 	}
 #endif
