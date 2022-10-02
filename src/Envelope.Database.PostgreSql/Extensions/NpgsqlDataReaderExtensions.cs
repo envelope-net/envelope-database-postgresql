@@ -1,4 +1,6 @@
-﻿namespace Npgsql;
+﻿using Npgsql;
+
+namespace Envelope.Extensions;
 
 public static class NpgsqlDataReaderExtensions
 {
