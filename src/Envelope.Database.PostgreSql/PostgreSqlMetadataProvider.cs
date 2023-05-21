@@ -404,8 +404,8 @@ public class PostgreSqlMetadataProvider : DbMetadataProvider
 					ForeignTable = foreignTable,
 					Name = reader.GetValueOrDefault<string>("constraint_name"),
 					MatchOption = EnumHelper.ConvertStringToEnum<MatchOprions>(reader.GetValueOrDefault<string>("match_option")?.Replace(" ", "")!, true),
-					OnUpdateAction = EnumHelper.ConvertStringToEnum<ReferentialAction>(reader.GetValueOrDefault<string>("update_rule")?.Replace(" ", "")!, true),
-					OnDeleteAction = EnumHelper.ConvertStringToEnum<ReferentialAction>(reader.GetValueOrDefault<string>("delete_rule")?.Replace(" ", "")!, true)
+					OnUpdateAction = EnumHelper.ConvertStringToEnum<Sql.Metadata.ReferentialAction>(reader.GetValueOrDefault<string>("update_rule")?.Replace(" ", "")!, true),
+					OnDeleteAction = EnumHelper.ConvertStringToEnum<Sql.Metadata.ReferentialAction>(reader.GetValueOrDefault<string>("delete_rule")?.Replace(" ", "")!, true)
 				};
 
 				var column = table.Columns.FirstOrDefault(c => c.Name == reader.GetValueOrDefault<string>("column_name"));
